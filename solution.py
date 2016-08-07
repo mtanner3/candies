@@ -3,22 +3,17 @@ import sys
 
 rank_arr = []
 candy_arr = []
-rank_location = {}
 MAX_RANKING = 10**5
 
 num_children = int(raw_input().strip())
 # read in the student rankings, initialize rank_arr and candy_arr
-# also initialize rank_location, a reverse hash of rank to locations
-# also find the minimum
+# also find the minimum ranking
 minrank = MAX_RANKING + 1
 for idx in range(num_children):
     rank = int(raw_input().strip())
     rank_arr.append(rank)
     if rank < minrank:
         minrank = rank
-    if rank not in rank_location.keys():
-        rank_location[rank] = []
-    rank_location[rank].append(idx)
     candy_arr.append(0)
 
 def done():
@@ -39,14 +34,59 @@ def print_candies():
 #minrank = min(rank_arr) # faster than tracking this while reading input?
 # give one candy to all the min-rank students
 for idx in range(num_children):
-    this_rank = rank_arr[idx]
-    if this_rank == minrank:
+    if rank_arr[idx] == minrank:
         candy_arr[idx] = 1
 
 # split the list into sublists on min-rank student boundaries
 LOL = []
+
+offset = 0
+tmplist = []
+for idx in range(num_children):
+    if candy_arr[idx] == 1:
+        if len(tmplist) > 0:
+            LOL.append( (offset, tmplist) )
+        tmplist = []
+        offset = idx+1
+    else:
+        tmplist.append(rank_arr[idx])
+if len(tmplist) > 0:
+    LOL.append( (offset, tmplist) )
+
+print LOL
+
+new_LOL = []
+while len(LOL) > 0:
+    entry = LOL.pop()
+    offset = entry[0]
+    sublist = entry[1]
+    if len(sublist) == 2:
+        if offset == 0 and (sublist[0] <= sublist[1]):
+            candy_arr[offset] = 1
+        if offset == (num_children-1) and (sublist[1] <= sublist[0]):
+            candy_arr[offset+1] = 1
+
+    elif len(sublist) == 1:
+        if offset == 0: 
+            if sublist[0] > rank_arr[offset+1]:
+                candy_arr[offset] = candy_arr[offset+1] + 1
+        if offset == (num_children-1):
+            candy_arr[offset+1] = 1
+
+
+
+
+        if sublist[offset] > rank_arr[offset-1]:
+            candy_arr[offset] = candy_arr[offset-1] + 1
+        else:
+            candy_arr[offset] = 1
+
+
+
+"""
+
+
 # set up left edge
-minrank_arr = rank_location[minrank]
 if minrank_arr[minrank] == 0:
     minrank_arr.pop(0)
 if minrank_arr[minrank] == 1:
@@ -147,4 +187,4 @@ new_lists.append(rank_arr[left+1:right])
 
 print "new lists:"
 print new_lists
-
+"""
